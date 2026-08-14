@@ -1,8 +1,18 @@
-- 在任何非代码文件的文档文件里，只要是中文，禁止使用硬换行 (不要像英文那样在 79 个字符处插入换行符)。中文段落保持为一个逻辑行，由编辑器/阅读器软换行; 代码块、表格等保持原有格式。
-- 所有 commit message 一律使用英文。
-- 禁止在任何地方出现 emoji 和 fancy 的 unicode symbol; 需要符号的地方一律使用 ascii, 例如勾/叉用 `[x]` / `[ ]` 或 `ok` / `fail`, 不用 unicode 的勾/叉/对号 (U+2713/U+2714/U+2716/U+2718), 箭头用 `->`, 破折号用 `-`, 省略用 `...`。
-- 如果用户要求建立 GitHub issue, 一律使用中文撰写 (issue 是给用户自己看的)。
-- 创建或修改任何中文文档后，必须运行一次 `autocorrect --fix <文件>` 纠正标点与空格，运行后检查 diff 确认没有引入不希望的改动; 二进制文件 (docx/pdf/图片等) 不直接运行。
-- `autocorrect` 不会把中文正文里的 ASCII 直引号 `"` / `'` 转换为弯引号。完成 `autocorrect --fix <文件>` 后，对 Markdown 正文运行 `uv run --script ~/.pi/agent/scripts/convert_chinese_quotes.py <文件>`；该脚本只转换含 CJK 的成对引号，跳过 fenced code、inline code 和缩进代码块，输出使用 U+201C/U+201D 及 U+2018/U+2019。
-- 使用英文 skill (包括 Matt skills) 时，skill 的英文只作为内部工作指令; 凡是由 skill 直接创建或修改、面向用户阅读的文档，正文默认使用中文。
-- 所有 Python 项目必须使用 `uv` 管理和运行。在容器环境中，Agent 创建的项目虚拟环境必须放在容器临时目录中，不要在仓库内创建或复用 `.venv`。运行 `uv` 前优先设置 `UV_PROJECT_ENVIRONMENT` 指向 `/tmp` 下按项目或会话隔离的目录，以便宿主机可以使用自己的 `uv run` 创建适配本机平台的虚拟环境，避免跨平台复用容器生成的环境。
+# 运行环境与持久化
+
+- 当前运行在 Linux 容器中。命令、路径、工具和 API 均按 Linux 环境选择。宿主机项目挂载为 `/workspace/<目录名>`，媒体挂载为 `/media/<目录名>`；`pwsh` 是 Linux PowerShell，不能使用 `cmd.exe`、`.bat`、`.cmd`、注册表或 Windows 专属 .NET API。
+- 需要跨容器保留的容器专属数据使用现有 named volume：模型与下载缓存放 `/root/.cache`（`pi-cache`），仅 Linux 的 uv 环境和 workbench 数据放 `/data`（`pi-data`）。
+- `/tmp` 只放一次性数据。项目源码、产物和媒体文件继续放宿主机 bind mount，不要移入 named volume；不要在宿主机仓库中创建或复用容器生成的 `.venv`。
+
+# Git
+
+- `gh` 已登录时，容器 entrypoint 会运行 `gh auth setup-git` 配置 HTTPS 凭据，并另外从 GitHub 账号补齐缺失的 `user.name` 和 `user.email`。正常情况下直接提交或推送；失败时再检查 `gh auth status` 和 `git config --global --list`。需要固定身份时，在启动前设置 `PI_GIT_NAME` 和 `PI_GIT_EMAIL`。
+- GitHub issue 的标题和正文使用中文；commit message 使用英文。非琐碎提交必须包含正文，简要说明动机、关键决策和验证结果。使用 scope-based 的 conventional commit message 风格。
+
+# 文档与项目
+
+- 中文文档按自然段保存，一个段落保持一个逻辑行，由编辑器软换行。
+- 不使用 emoji 或纯装饰性的 Unicode 符号；状态、箭头、破折号和省略号分别使用 `[x]`、`[ ]`、`ok`、`fail`、`->`、`-` 和 `...`。允许在目录树、层级图等结构化文本中使用 `├──`、`└──`、`│` 等 box-drawing 字符；正常中文标点和中文弯引号也不受此限制。
+- 修改中文文本型文档后运行 `autocorrect --fix <文件>`；Markdown 文件随后运行 `uv run --script ~/.pi/agent/scripts/convert_chinese_quotes.py <文件>`，最后检查 diff。二进制文件不运行这些命令。
+- 英文 skill 只作为内部工作指令；其生成或修改的用户文档默认使用中文。
+- Python 项目统一使用 `uv`。一次性环境通过 `UV_PROJECT_ENVIRONMENT` 放在 `/tmp` 下的独立目录；需要跨容器保留的 Linux 环境放在 `/data` 下。
