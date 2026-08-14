@@ -1,0 +1,8 @@
+- 在任何非代码文件的文档文件里，只要是中文，禁止使用硬换行 (不要像英文那样在 79 个字符处插入换行符)。中文段落保持为一个逻辑行，由编辑器/阅读器软换行; 代码块、表格等保持原有格式。
+- 所有 commit message 一律使用英文。
+- 禁止在任何地方出现 emoji 和 fancy 的 unicode symbol; 需要符号的地方一律使用 ascii, 例如勾/叉用 `[x]` / `[ ]` 或 `ok` / `fail`, 不用 unicode 的勾/叉/对号 (U+2713/U+2714/U+2716/U+2718), 箭头用 `->`, 破折号用 `-`, 省略用 `...`。
+- 如果用户要求建立 GitHub issue, 一律使用中文撰写 (issue 是给用户自己看的)。
+- 创建或修改任何中文文档后，必须运行一次 `autocorrect --fix <文件>` 纠正标点与空格，运行后检查 diff 确认没有引入不希望的改动; 二进制文件 (docx/pdf/图片等) 不直接运行。
+- `autocorrect` 不会把中文正文里的 ASCII 直引号 `"` / `'` 转换为弯引号。完成 `autocorrect --fix <文件>` 后，对 Markdown 正文运行 `uv run --script ~/.pi/agent/scripts/convert_chinese_quotes.py <文件>`；该脚本只转换含 CJK 的成对引号，跳过 fenced code、inline code 和缩进代码块，输出使用 U+201C/U+201D 及 U+2018/U+2019。
+- 使用英文 skill (包括 Matt skills) 时，skill 的英文只作为内部工作指令; 凡是由 skill 直接创建或修改、面向用户阅读的文档，正文默认使用中文。
+- 所有 Python 项目必须使用 `uv` 管理和运行。在容器环境中，Agent 创建的项目虚拟环境必须放在容器临时目录中，不要在仓库内创建或复用 `.venv`。运行 `uv` 前优先设置 `UV_PROJECT_ENVIRONMENT` 指向 `/tmp` 下按项目或会话隔离的目录，以便宿主机可以使用自己的 `uv run` 创建适配本机平台的虚拟环境，避免跨平台复用容器生成的环境。

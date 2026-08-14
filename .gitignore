@@ -1,0 +1,26 @@
+# Secrets and machine-local state from the pi agent home.
+# Never version these, even if the whole home dir gets copied in.
+auth.json
+models-store.json
+settings.json
+
+# Runtime state.
+sessions/
+intercom/
+state/
+git/
+
+# Installed tooling.
+bin/
+npm/
+extensions/
+
+# Not tracked yet (add to the repo later if desired).
+skills/
+agents/
+
+# Generic.
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
